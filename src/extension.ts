@@ -28,6 +28,7 @@ import { loadNamedProfile, loadAllProfiles } from "./ProfileLoader";
 import * as nls from "vscode-nls";
 import * as utils from "./utils";
 import SpoolProvider, { encodeJobFile } from "./SpoolProvider";
+import { createNewConnection } from "./CreateConnection";
 const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 
@@ -555,6 +556,7 @@ export async function submitMember(node: ZoweNode) {
  */
 export async function addSession(datasetProvider: DatasetTree) {
     let allProfiles;
+    const createNewProfile = "Click to create a new profile";
     try {
         allProfiles = loadAllProfiles();
     } catch (err) {
@@ -576,15 +578,20 @@ export async function addSession(datasetProvider: DatasetTree) {
     } else {
         vscode.window.showInformationMessage(localize("addSession.noProfile", "No profiles detected"));
         return;
-    }
+    } // TODO: If no profiles are loaded "Create New Profile" should be the only option
     if (profileNamesList.length > 0) {
         const quickPickOptions: vscode.QuickPickOptions = {
-            placeHolder: localize("addSession.quickPickOption", "Select a Profile to Add to the Data Set Explorer"),
+            placeHolder: localize("addSession.quickPickOption",
+            "Choose \"Create new...\" to define a new profile alternatively select an exiting profile to Add to the Data Set Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
         };
+        profileNamesList.unshift(createNewProfile);
         const chosenProfile = await vscode.window.showQuickPick(profileNamesList, quickPickOptions);
-        if (chosenProfile) {
+        if (chosenProfile === createNewProfile) {
+            log.debug(localize("addSession.log.debug.createNewProfile", "User created a new profile"));
+            await createNewConnection();
+        } else if(chosenProfile) {
             log.debug(localize("addSession.log.debug.selectedProfile", "User selected profile ") + chosenProfile);
             await datasetProvider.addSession(log, chosenProfile);
         } else {
