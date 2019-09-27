@@ -82,6 +82,13 @@ export async function createNewConnection() {
         return;
     }
 
+    for (const verifyProfile of listProfile()) {
+        if (verifyProfile.name === profileName) {
+            vscode.window.showErrorMessage(localize("createNewConnection.duplicateProfileName", "Profile name already exists. Please choose another one."));
+            return;
+        }
+    } 
+
     const existingProfiles: IConnection[] = await listProfile()
     existingProfiles.push({
         name: profileName,

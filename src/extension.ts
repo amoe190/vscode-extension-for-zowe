@@ -29,6 +29,7 @@ import * as nls from "vscode-nls";
 import * as utils from "./utils";
 import SpoolProvider, { encodeJobFile } from "./SpoolProvider";
 import { createNewConnection } from "./CreateConnection";
+import { listProfile } from "./ConnectionProvider";
 const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 
@@ -556,8 +557,10 @@ export async function submitMember(node: ZoweNode) {
  */
 export async function addSession(datasetProvider: DatasetTree) {
     let allProfiles;
+    let allVSCProfiles;
     const createNewProfile = "Click to create a new profile";
     try {
+        allVSCProfiles = listProfile();
         allProfiles = loadAllProfiles();
     } catch (err) {
         log.error(localize("addSession.log.error.addingSession", "Error encountered when adding session! ") + JSON.stringify(err));
@@ -565,9 +568,14 @@ export async function addSession(datasetProvider: DatasetTree) {
         throw (err);
     }
 
+    let VSCprofileNamesList = allVSCProfiles.map((VSCprofile) => {
+        return VSCprofile.name;
+    });
+
     let profileNamesList = allProfiles.map((profile) => {
         return profile.name;
     });
+
     if (profileNamesList.length > 0) {
         profileNamesList = profileNamesList.filter((profileName) =>
             // Find all cases where a profile is not already displayed
@@ -578,7 +586,28 @@ export async function addSession(datasetProvider: DatasetTree) {
     } else {
         vscode.window.showInformationMessage(localize("addSession.noProfile", "No profiles detected"));
         return;
-    } // TODO: If no profiles are loaded "Create New Profile" should be the only option
+    } 
+
+    
+    if ( VSCprofileNamesList.length > 0) {
+        VSCprofileNamesList =  VSCprofileNamesList.filter((profileName) =>
+            // Find all cases where a profile is not already displayed
+            !datasetProvider.mSessionNodes.find((sessionNode) =>
+                sessionNode.label.trim() === profileName
+            )
+        );
+        
+    } else {
+        vscode.window.showInformationMessage(localize("addSession.noProfile", "No profiles detected"));
+        return;
+    } 
+
+    // Load all VSC Profiles in the List
+    for (const VSCprofile of VSCprofileNamesList) {
+        profileNamesList.unshift(VSCprofile)
+    };
+
+
     if (profileNamesList.length > 0) {
         const quickPickOptions: vscode.QuickPickOptions = {
             placeHolder: localize("addSession.quickPickOption",
@@ -614,6 +643,7 @@ export async function addSession(datasetProvider: DatasetTree) {
  */
 export async function addUSSSession(ussFileProvider: USSTree) {
     let allProfiles;
+    const createNewProfile = "Click to create a new profile";
     try {
         allProfiles = loadAllProfiles();
     } catch (err) {
@@ -639,20 +669,25 @@ export async function addUSSSession(ussFileProvider: USSTree) {
     }
     if (profileNamesList.length) {
         const quickPickOptions: vscode.QuickPickOptions = {
-            placeHolder: localize("addUSSSession.quickPickOption", "Select a Profile to Add to the USS Explorer"),
+            placeHolder: localize("addUSSSession.quickPickOption", 
+            "Choose \"Create new...\" to define a new profile alternatively select an existing profile to Add to the USS Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
         };
+        profileNamesList.unshift(createNewProfile);
         const chosenProfile = await vscode.window.showQuickPick(profileNamesList, quickPickOptions);
-        if (chosenProfile) {
+        if (chosenProfile === createNewProfile) {
+            log.debug(localize("addUSSSession.log.debug.createNewProfile", "User created a new profile"));
+            await createNewConnection();
+        } else if (chosenProfile) {
             log.debug(localize("addUSSSession.log.debug.selectProfile", "User selected profile ") + chosenProfile);
             await ussFileProvider.addSession(log, chosenProfile);
         } else {
             log.debug(localize("addUSSSession.log.debug.cancelledSelection", "User cancelled profile selection"));
         }
     } else {
-        vscode.window.showInformationMessage(
-            localize("addUSSSession.noProfileAdd", "No more profiles to add"));  // TODO MISSED TESTING
+        log.debug(localize("addUSSSession.log.debug.createNewProfile", "User created a new profile"));
+        await createNewConnection(); // TODO MISSED TESTING
     }
 }
 
@@ -1599,9 +1634,11 @@ export async function setId(job: Job, jobsProvider: ZosJobsProvider) {
 
 export async function addJobsSession(datasetProvider: ZosJobsProvider) {
     let allProfiles;
+    const createNewProfile = "Click to create a new profile";
     try {
         allProfiles = loadAllProfiles();
     } catch (err) {
+        log.error(localize("addJobsSession.log.error.addingSession", "Error encountered when adding session! ") + JSON.stringify(err));
         vscode.window.showErrorMessage(localize("addJobsSession.error.load", "Unable to load all profiles: ") + err.message);
         throw (err);
     }
@@ -1622,18 +1659,24 @@ export async function addJobsSession(datasetProvider: ZosJobsProvider) {
     }
     if (profileNamesList.length) {
         const quickPickOptions: vscode.QuickPickOptions = {
-            placeHolder: localize("addJobsSession.quickPickOptions.profileAdd", "Select a Profile to Add to the Jobs Explorer"),
+            placeHolder: localize("addJobsSession.quickPickOptions.profileAdd", 
+            "Choose \"Create new...\" to define a new profile alternatively select an existing profile to Add to the Jobs Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
         };
+        profileNamesList.unshift(createNewProfile);
         const chosenProfile = await vscode.window.showQuickPick(profileNamesList, quickPickOptions);
-        if (chosenProfile) {
+        if (chosenProfile === createNewProfile) {
+            log.debug(localize("addJobsSession.log.debug.createNewProfile", "User created a new profile"));
+            await createNewConnection();
+        } else if (chosenProfile) {
             log.debug(localize("addJobsSession.log.debug.selectedProfile", "User selected profile ") + chosenProfile);
             await datasetProvider.addSession(log, chosenProfile);
         } else {
             log.debug(localize("addJobsSession.log.debug.cancelledProfile", "User cancelled profile selection"));
         }
     } else {
-        vscode.window.showInformationMessage(localize("addJobsSession.noProfilesAdd", "No more profiles to add"));
+        log.debug(localize("addJobsSession.log.debug.createNewProfile", "User created a new profile"));
+        await createNewConnection();
     }
 }
