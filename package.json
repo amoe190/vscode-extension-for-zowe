@@ -818,6 +818,32 @@
       "type": "object",
       "title": "%configuration.title%",
       "properties": {
+        "Zowe-Zosmf-Profiles": {
+          "type": "array",
+          "title": "",
+          "items": {
+              "type": "object",
+              "title": "%profile.configuration.title%",
+              "properties": {
+                  "Profilename": {
+                      "type": "string",
+                      "description": "%profile.configuration.name%"
+                  },
+                  "Zosmfurl": {
+                      "type": "string",
+                      "description": "%profile.configuration.url%"
+                  },
+                  "Username": {
+                      "type": "string",
+                      "description": "%profile.configuration.user%"
+                  },
+                  "rejectunauthorize": {
+                    "type": "string",
+                    "description": "%profile.configuration.ru%"
+                }
+              }
+            }
+          },
         "Zowe-Default-Datasets-Binary": {
           "default": {
             "dsorg": "PO",

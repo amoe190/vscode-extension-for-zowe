@@ -598,7 +598,8 @@ export async function addSession(datasetProvider: DatasetTree) {
             log.debug(localize("addSession.log.debug.cancelledSelection", "User cancelled profile selection"));
         }
     } else {
-        vscode.window.showInformationMessage(localize("addSession.noProfilesAdd", "No more profiles to add"));
+        log.debug(localize("addSession.log.debug.createNewProfile", "User created a new profile"));
+        await createNewConnection();
     }
 }
 

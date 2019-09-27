@@ -12,6 +12,8 @@
 import { URL } from "url";
 import * as vscode from "vscode";
 import * as nls from "vscode-nls";
+import { IConnection } from "./connection/IConnection";
+import { listProfile, updateProfile } from "./ConnectionProvider";
 const localize = nls.config({ messageFormat: nls.MessageFormat.file })();
 
 export async function createNewConnection() {
@@ -31,6 +33,7 @@ export async function createNewConnection() {
         return url.port ? true : false;
     };
 
+    url
     zosmfURL = await vscode.window.showInputBox({
         ignoreFocusOut: true,
         placeHolder: "URL",
@@ -78,4 +81,17 @@ export async function createNewConnection() {
                 "Operation Cancelled"));
         return;
     }
+
+    const existingProfiles: IConnection[] = await listProfile()
+    existingProfiles.push({
+        name: profileName,
+        url: zosmfURL,
+        username: userName,
+        password: "",
+        reject_unauthorized: rejectUnauthorize,
+    });
+
+    await updateProfile (existingProfiles);
+    vscode.window.showInformationMessage("Profile " + profileName + " was created.");
+
 }
