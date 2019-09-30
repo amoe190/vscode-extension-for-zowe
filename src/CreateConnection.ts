@@ -33,7 +33,6 @@ export async function createNewConnection() {
         return url.port ? true : false;
     };
 
-    url
     zosmfURL = await vscode.window.showInputBox({
         ignoreFocusOut: true,
         placeHolder: "URL",
@@ -84,12 +83,13 @@ export async function createNewConnection() {
 
     for (const verifyProfile of listProfile()) {
         if (verifyProfile.name === profileName) {
-            vscode.window.showErrorMessage(localize("createNewConnection.duplicateProfileName", "Profile name already exists. Please choose another one."));
+            vscode.window.showErrorMessage(localize("createNewConnection.duplicateProfileName",
+            "Profile name already exists."));
             return;
         }
-    } 
+    }
 
-    const existingProfiles: IConnection[] = await listProfile()
+    const existingProfiles: IConnection[] = await listProfile();
     existingProfiles.push({
         name: profileName,
         url: zosmfURL,

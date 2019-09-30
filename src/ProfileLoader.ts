@@ -67,9 +67,10 @@ export function loadDefaultProfile(log: Logger): IProfileLoaded {
             getProfileProcess.stderr.toString());
     }
     if (getProfileProcess.stdout.toString().length === 0) {
-        const defaultProfileMessage = localize("loadDefaultProfile.error.profile1", "No default zosmf profile found for Zowe CLI.")
-            + localize("loadDefaultProfile.error.profile2", " A default zosmf profile created with Zowe CLI is required to use the Zowe extension.")
-            + localize("loadDefaultProfile.error.profile3", " Please [create at least one profile with Zowe CLI]")
+        const defaultProfileMessage = localize("loadDefaultProfile.error.profile1", "No default zosmf profile found.")
+            + localize("loadDefaultProfile.error.profile2", " A default zosmf profile is required to use the Zowe extension.")
+            + localize("loadDefaultProfile.error.profile3", " Please create at least one using the plus (+) sign in the")
+            + localize("loadDefaultProfile.error.profile3", " Dataset, Jobs or USS tree or create a profile using ZOWE CLI ")
             + localize("loadDefaultProfile.error.profile4",
                 "(https://docs.zowe.org/stable/user-guide/cli-configuringcli.html#creating-zowe-cli-profiles).");
         // Display info message to user

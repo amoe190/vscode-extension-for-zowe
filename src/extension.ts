@@ -583,12 +583,9 @@ export async function addSession(datasetProvider: DatasetTree) {
                 sessionNode.label.trim() === profileName
             )
         );
-    } else {
-        vscode.window.showInformationMessage(localize("addSession.noProfile", "No profiles detected"));
-        return;
-    } 
+    }
 
-    
+
     if ( VSCprofileNamesList.length > 0) {
         VSCprofileNamesList =  VSCprofileNamesList.filter((profileName) =>
             // Find all cases where a profile is not already displayed
@@ -596,17 +593,12 @@ export async function addSession(datasetProvider: DatasetTree) {
                 sessionNode.label.trim() === profileName
             )
         );
-        
-    } else {
-        vscode.window.showInformationMessage(localize("addSession.noProfile", "No profiles detected"));
-        return;
-    } 
 
-    // Load all VSC Profiles in the List
-    for (const VSCprofile of VSCprofileNamesList) {
-        profileNamesList.unshift(VSCprofile)
-    };
-
+         // Load all VSC Profiles in the List
+        for (const VSCprofile of VSCprofileNamesList) {
+            profileNamesList.unshift(VSCprofile);
+        }
+    }
 
     if (profileNamesList.length > 0) {
         const quickPickOptions: vscode.QuickPickOptions = {
@@ -669,7 +661,7 @@ export async function addUSSSession(ussFileProvider: USSTree) {
     }
     if (profileNamesList.length) {
         const quickPickOptions: vscode.QuickPickOptions = {
-            placeHolder: localize("addUSSSession.quickPickOption", 
+            placeHolder: localize("addUSSSession.quickPickOption",
             "Choose \"Create new...\" to define a new profile alternatively select an existing profile to Add to the USS Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
@@ -1659,7 +1651,7 @@ export async function addJobsSession(datasetProvider: ZosJobsProvider) {
     }
     if (profileNamesList.length) {
         const quickPickOptions: vscode.QuickPickOptions = {
-            placeHolder: localize("addJobsSession.quickPickOptions.profileAdd", 
+            placeHolder: localize("addJobsSession.quickPickOptions.profileAdd",
             "Choose \"Create new...\" to define a new profile alternatively select an existing profile to Add to the Jobs Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
