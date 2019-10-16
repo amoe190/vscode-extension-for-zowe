@@ -20,8 +20,9 @@ export async function createNewConnection() {
     let url: URL;
     let profileName: string;
     let userName: string;
+    let passWord: string;
     let zosmfURL: string;
-    let rejectUnauthorize: string = "false";
+    let rejectUnauthorize: boolean;
     let options: vscode.InputBoxOptions;
 
     const validateUrl = (newUrl: string) => {
@@ -33,9 +34,21 @@ export async function createNewConnection() {
         return url.port ? true : false;
     };
 
+    options = {
+        placeHolder: localize("createNewConnection.option.prompt.profileName.placeholder", "Connection Name"),
+        prompt: localize("createNewConnection.option.prompt.profileName", "Enter a name for the connection"),
+        value: profileName
+    };
+    profileName = await vscode.window.showInputBox(options);
+    if (!profileName) {
+        vscode.window.showInformationMessage(localize("createNewConnection.enterprofileName",
+                "Profile Name was not supplied. Operation Cancelled"));
+        return;
+    }
+
     zosmfURL = await vscode.window.showInputBox({
         ignoreFocusOut: true,
-        placeHolder: "URL",
+        placeHolder: localize("createNewConnection.option.prompt.url.placeholder", "http(s)://url:port"),
         prompt: localize("createNewConnection.option.prompt.url",
         "Enter a z/OSMF URL in the format 'http(s)://url:port'."),
         validateInput: (text: string) => (validateUrl(text) ? "" : "Please enter a valid URL."),
@@ -49,33 +62,37 @@ export async function createNewConnection() {
     }
 
     options = {
-        prompt: localize("createNewConnection.option.prompt.profileName", "Enter a Profile Name"),
-        value: profileName
-    };
-    profileName = await vscode.window.showInputBox(options);
-    if (!profileName) {
-        vscode.window.showInformationMessage(localize("createNewConnection.enterprofileName",
-                "Operation Cancelled"));
-        return;
-    }
-
-    options = {
-        prompt: localize("createNewConnection.option.prompt.userName", "Enter a valid username"),
+        placeHolder: localize("createNewConnection.option.prompt.userName.placeholder", "User Name (Optional)"),
+        prompt: localize("createNewConnection.option.prompt.userName", "Optional: Enter the user name for the connection"),
         value: userName
     };
     userName = await vscode.window.showInputBox(options);
-    if (!userName) {
-        vscode.window.showInformationMessage(localize("createNewConnection.enteruserName",
-                "Operation Cancelled"));
-        return;
-    }
 
     options = {
-        prompt: localize("createNewConnection.option.prompt.rejectUnauthorize", "Set to \"true\" to enable reject unauthorize"),
-        value: rejectUnauthorize
+        placeHolder: localize("createNewConnection.option.prompt.passWord.placeholder", "Password (Optional)"),
+        prompt: localize("createNewConnection.option.prompt.userName", "Optional: Enter a password for the connection"),
+        value: passWord
     };
-    rejectUnauthorize = await vscode.window.showInputBox(options);
-    if (!rejectUnauthorize) {
+    passWord = await vscode.window.showInputBox(options);
+
+    const quickPickOptions: vscode.QuickPickOptions = {
+        placeHolder: localize("createNewConnection.option.prompt.ru.placeholder", "Reject Unauthorized Connections"),
+        ignoreFocusOut: true,
+        canPickMany: false
+    };
+
+    const selectRU = [ "True - Reject connections with self-signed certificates",
+                       "False - Accept connections with self-signed certificates" ];
+
+    const ruOptions = Array.from(selectRU);
+
+    const chosenRU = await vscode.window.showQuickPick(ruOptions, quickPickOptions);
+
+    if (chosenRU === ruOptions[0]) {
+        rejectUnauthorize = true;
+    } else if (chosenRU === ruOptions[1]) {
+        rejectUnauthorize = false;
+    } else {
         vscode.window.showInformationMessage(localize("createNewConnection.rejectUnauthorize",
                 "Operation Cancelled"));
         return;
@@ -94,8 +111,8 @@ export async function createNewConnection() {
         name: profileName,
         url: zosmfURL,
         username: userName,
-        password: "",
-        reject_unauthorized: rejectUnauthorize,
+        password: passWord,
+        reject_unauthorized: String(rejectUnauthorize),
     });
 
     await updateProfile (existingProfiles);

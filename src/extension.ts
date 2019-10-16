@@ -558,7 +558,7 @@ export async function submitMember(node: ZoweNode) {
 export async function addSession(datasetProvider: DatasetTree) {
     let allProfiles;
     let allVSCProfiles;
-    const createNewProfile = "Click to create a new profile";
+    const createNewProfile = "Create a New Connection to z/OS";
     try {
         allVSCProfiles = listProfile();
         allProfiles = loadAllProfiles();
@@ -603,7 +603,7 @@ export async function addSession(datasetProvider: DatasetTree) {
     if (profileNamesList.length > 0) {
         const quickPickOptions: vscode.QuickPickOptions = {
             placeHolder: localize("addSession.quickPickOption",
-            "Choose \"Create new...\" to define a new profile alternatively select an exiting profile to Add to the Data Set Explorer"),
+            "Choose \"Create new...\" to define a new profile or select an existing profile to Add to the Data Set Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
         };
@@ -635,7 +635,7 @@ export async function addSession(datasetProvider: DatasetTree) {
  */
 export async function addUSSSession(ussFileProvider: USSTree) {
     let allProfiles;
-    const createNewProfile = "Click to create a new profile";
+    const createNewProfile = "Create a New Connection to z/OS";
     try {
         allProfiles = loadAllProfiles();
     } catch (err) {
@@ -662,7 +662,7 @@ export async function addUSSSession(ussFileProvider: USSTree) {
     if (profileNamesList.length) {
         const quickPickOptions: vscode.QuickPickOptions = {
             placeHolder: localize("addUSSSession.quickPickOption",
-            "Choose \"Create new...\" to define a new profile alternatively select an existing profile to Add to the USS Explorer"),
+            "Choose \"Create new...\" to define a new profile or select an existing profile to Add to the USS Explorer"),
             ignoreFocusOut: true,
             canPickMany: false
         };
